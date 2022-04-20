@@ -5,6 +5,8 @@ Created on Thu Aug 15 11:21:22 2019
 @author: suchismitasa
 """
 
+import csv
+import os
 import torch
 import torchvision as tv
 import torchvision.transforms as transforms
@@ -37,7 +39,7 @@ class Autoencoder(nn.Module):
 
     def __init__(self):
         super(Autoencoder, self).__init__()
-        
+
         self.encoder = nn.Sequential(
             nn.Conv2d(1, 6, kernel_size=5),
             nn.ReLU(True),
@@ -65,26 +67,40 @@ class Autoencoder(nn.Module):
 
 # Defining Parameters
 if __name__ == '__main__':
-    num_epochs = 10
+    if os.path.exists('log.csv'):
+        os.remove('log.csv')
+
+    num_epochs = 20
     model = Autoencoder().cpu()
+
+    # model.load_state_dict(torch.load('Models/model_e5.pt'))
+    # model.eval()
+
     distance = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), weight_decay=1e-5, lr=1e-4)
 
     print('Start training.')
     for epoch in range(num_epochs):
-        i = 0
+        # =====================Training================
         for data in dataloader:
-            print(i)
-            i += 1
             img, _ = data
             img = Variable(img).cpu()
             # ===================forward=====================
             output = model(img)
-            loss = distance(output, img)
+            tr_loss = distance(output, img)
             # ===================backward====================
             optimizer.zero_grad()
-            loss.backward()
+            tr_loss.backward()
             optimizer.step()
+        # =================Testing======================
+        for data in testloader:
+            img, _ = data
+            img = Variable(img).cpu()
+            # ===================forward=====================
+            output = model(img)
+            test_loss = distance(output, img)
         # ===================log========================
-        print('epoch [{}/{}], loss:{:.4f}'.format(epoch+1, num_epochs, loss.item()))
-    torch.save(model.state_dict(), 'tr_model.pt')
+        with open('log.csv', 'a') as f:
+            csv.writer(f).writerow([epoch, tr_loss.item(), test_loss.item()])
+        print(f'epoch [{epoch+1}/{num_epochs}], loss:{round(tr_loss.item(), 4)}')
+        torch.save(model.state_dict(), f'Models/model_e{epoch}.pt')
