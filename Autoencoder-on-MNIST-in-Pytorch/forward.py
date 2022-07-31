@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import torch
 
 model = Autoencoder().cpu()
-model.load_state_dict(torch.load('Models/model_e14.pt'))
+model.load_state_dict(torch.load('Models/model_e19.pt'))
 model.eval()
 
 n = [247]

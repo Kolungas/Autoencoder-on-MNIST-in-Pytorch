@@ -25,11 +25,11 @@ trainTransform = tv.transforms.Compose(
 trainset = tv.datasets.MNIST(root='./data',  train=True, download=True,
                              transform=transform)
 dataloader = data.DataLoader(trainset, batch_size=32, shuffle=False,
-                                         num_workers=4)
+                             num_workers=4)
 testset = tv.datasets.MNIST(root='./data', train=False, download=True,
                             transform=transform)
 testloader = data.DataLoader(testset, batch_size=32, shuffle=False,
-                                         num_workers=2)
+                             num_workers=2)
 print('Data loaded.')
 
 
